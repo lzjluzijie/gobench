@@ -2,7 +2,7 @@
 
 To-Do
  - [ ] Multiple node speedtest
- - [ ] System info
+ - [x] System info
  - [ ] Better CPU benchmark
  - [ ] Memory benchmark
  - [ ] Trace route

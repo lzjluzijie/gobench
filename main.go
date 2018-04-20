@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -11,6 +9,9 @@ import (
 	"runtime"
 	"time"
 
+	"encoding/json"
+
+	"github.com/juju/loggo"
 	"github.com/lzjluzijie/gobench/bench"
 )
 
@@ -18,54 +19,65 @@ var MB = int64(1024 * 1024)
 var hashSize = 1 * MB
 var downloadSize = 100 * MB
 
+var logger = loggo.GetLogger("main")
+
 func main() {
+	logger.SetLogLevel(loggo.INFO)
+	//System info
+	info, err := bench.GetInfo()
+	j, err := json.Marshal(info)
+	if err != nil {
+		logger.Errorf(err.Error())
+	}
+	logger.Infof(string(j))
+
 	//CPU test
 	threads := runtime.NumCPU()
 	hashes := bench.Hash(threads, hashSize)
-	log.Printf("CPU benchmark %d hashes with %d threads in 10s", hashes, threads)
+	logger.Infof("CPU benchmark %d hashes with %d threads in 10s", hashes, threads)
 
 	//disk test
 	d, err := bench.Write(1 * MB)
 	if err != nil {
-		log.Fatalln(err.Error())
+		logger.Errorf(err.Error())
 	}
-	log.Printf("Write 1MB speed %.2fMB/s", 1/d.Seconds())
+	logger.Infof("Write 1MB speed %.2fMB/s", 1/d.Seconds())
 	d, err = bench.Read()
 	if err != nil {
-		log.Fatalln(err.Error())
+		logger.Errorf(err.Error())
 	}
-	log.Printf("Read 1MB speed %.2fMB/s", 1/d.Seconds())
+	logger.Infof("Read 1MB speed %.2fMB/s", 1/d.Seconds())
 
 	d, err = bench.Write(16 * MB)
 	if err != nil {
-		log.Fatalln(err.Error())
+		logger.Errorf(err.Error())
 	}
-	log.Printf("Write 16MB speed %.2fMB/s", 16/d.Seconds())
+	logger.Infof("Write 16MB speed %.2fMB/s", 16/d.Seconds())
 	d, err = bench.Read()
 	if err != nil {
-		log.Fatalln(err.Error())
+		logger.Errorf(err.Error())
 	}
-	log.Printf("Read 16MB speed %.2fMB/s", 16/d.Seconds())
+	logger.Infof("Read 16MB speed %.2fMB/s", 16/d.Seconds())
 	d, err = bench.Write(256 * MB)
 	if err != nil {
-		log.Fatalln(err.Error())
+		logger.Errorf(err.Error())
 	}
-	log.Printf("Write 256MB speed %.2fMB/s", 256/d.Seconds())
+	logger.Infof("Write 256MB speed %.2fMB/s", 256/d.Seconds())
 	d, err = bench.Read()
 	if err != nil {
-		log.Fatalln(err.Error())
+		logger.Errorf(err.Error())
 	}
-	log.Printf("Read 256MB speed %.2fMB/s", 256/d.Seconds())
+	logger.Infof("Read 256MB speed %.2fMB/s", 256/d.Seconds())
 	err = os.Remove("gobench.tmp")
 	if err != nil {
-		log.Fatalln(err.Error())
+		logger.Errorf(err.Error())
 	}
 
 	//speed test
 	t := time.Now()
 	resp, err := http.Get(fmt.Sprintf("http://www2.unicomtest.com:8080/download?downloadSize=%d", downloadSize))
 	if err != nil {
-		log.Fatalln(err.Error())
+		logger.Errorf(err.Error())
 	}
 
 	_, err = ioutil.ReadAll(&io.LimitedReader{
@@ -74,8 +86,8 @@ func main() {
 	})
 
 	if err != nil {
-		log.Fatalln(err.Error())
+		logger.Errorf(err.Error())
 	}
 
-	log.Printf("北京联通 time:%.2fs, speed:%.2fMB/s", time.Since(t).Seconds(), float64(downloadSize/MB)/time.Since(t).Seconds())
+	logger.Infof("北京联通 time:%.2fs, speed:%.2fMB/s", time.Since(t).Seconds(), float64(downloadSize/MB)/time.Since(t).Seconds())
 }
