@@ -6,10 +6,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"runtime"
 	"time"
 
 	"encoding/json"
+
+	"runtime"
 
 	"github.com/juju/loggo"
 	"github.com/lzjluzijie/gobench/bench"
@@ -36,54 +37,36 @@ func main() {
 	if err != nil {
 		logger.Errorf(err.Error())
 	}
-	logger.Infof("Read rand 1KB: %.2fus", float64(d)/1000/1000)
+	logger.Infof("Read rand 1KB: %.2fµs", float64(d)/1000/1000)
 	d, err = bench.Rand(1024*1024, 100)
 	if err != nil {
 		logger.Errorf(err.Error())
 	}
-	logger.Infof("Read rand 1MB: %.2fus", float64(d)/1000/100)
+	logger.Infof("Read rand 1MB: %.2fµs", float64(d)/1000/100)
+
+	//disk test
+	times := bench.Write(1024)
+	logger.Infof("Write 1KB: %dKB/s", times/10)
+	times = bench.Read(1024)
+	logger.Infof("Read 1KB: %dKB/s", times/10)
+	times = bench.Write(1 * MB)
+	logger.Infof("Write 1MB: %dMB/s", times/10)
+	times = bench.Read(1 * MB)
+	logger.Infof("Read 1MB: %dMB/s", times/10)
+	times = bench.Write(10 * MB)
+	logger.Infof("Write 10MB: %dMB/s", times*10/10)
+	times = bench.Read(10 * MB)
+	logger.Infof("Read 10MB: %dMB/s", times*10/10)
+	time.Sleep(5 * time.Second)
+	err = os.Remove("gobench.tmp")
+	if err != nil {
+		logger.Errorf(err.Error())
+	}
 
 	//CPU test
 	threads := runtime.NumCPU()
 	hashes := bench.Hash(threads, hashSize)
 	logger.Infof("CPU benchmark: %d hashes with %d threads in 10s", hashes, threads)
-
-	//disk test
-	d, err = bench.Write(1 * MB)
-	if err != nil {
-		logger.Errorf(err.Error())
-	}
-	logger.Infof("Write 1MB: speed %.2fMB/s", 1/d.Seconds())
-	d, err = bench.Read(1 * MB)
-	if err != nil {
-		logger.Errorf(err.Error())
-	}
-	logger.Infof("Read 1MB: speed %.2fMB/s", 1/d.Seconds())
-
-	d, err = bench.Write(16 * MB)
-	if err != nil {
-		logger.Errorf(err.Error())
-	}
-	logger.Infof("Write 16MB: speed %.2fMB/s", 16/d.Seconds())
-	d, err = bench.Read(16 * MB)
-	if err != nil {
-		logger.Errorf(err.Error())
-	}
-	logger.Infof("Read 16MB: speed %.2fMB/s", 16/d.Seconds())
-	d, err = bench.Write(256 * MB)
-	if err != nil {
-		logger.Errorf(err.Error())
-	}
-	logger.Infof("Write 256MB: speed %.2fMB/s", 256/d.Seconds())
-	d, err = bench.Read(256 * MB)
-	if err != nil {
-		logger.Errorf(err.Error())
-	}
-	logger.Infof("Read 256MB: speed %.2fMB/s", 256/d.Seconds())
-	err = os.Remove("gobench.tmp")
-	if err != nil {
-		logger.Errorf(err.Error())
-	}
 
 	//speed test
 	t := time.Now()

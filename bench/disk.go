@@ -2,49 +2,65 @@ package bench
 
 import (
 	"io"
-	"math/rand"
 	"os"
 	"time"
 )
 
-func Write(size int64) (d time.Duration, err error) {
-	file, err := os.Create("gobench.tmp")
-	if err != nil {
-		return
-	}
-	defer file.Close()
+func Write(size int64) (times int) {
+	go func() {
+		for {
+			file, err := os.Create("gobench.tmp")
+			if err != nil {
+				panic(err)
+			}
 
-	r := &io.LimitedReader{
-		R: rand.New(rand.NewSource(233)),
-		N: size,
-	}
+			r := &io.LimitedReader{
+				R: new(ZeroReadWriter),
+				N: size,
+			}
 
-	t := time.Now()
-	_, err = io.Copy(file, r)
-	d = time.Since(t)
+			_, err = io.Copy(file, r)
+			if err != nil {
+				panic(err)
+			}
+			file.Close()
+			times++
+		}
+	}()
 
+	time.Sleep(sleepTime)
 	return
 }
 
-func Read(size int64) (d time.Duration, err error) {
-	file, err := os.Open("gobench.tmp")
-	if err != nil {
-		return
-	}
-	defer file.Close()
+func Read(size int64) (times int) {
+	go func() {
+		for {
+			file, err := os.Open("gobench.tmp")
+			if err != nil {
+				panic(err)
+			}
 
-	r := &io.LimitedReader{
-		R: file,
-		N: size,
-	}
-	t := time.Now()
-	io.Copy(new(NWriter), r)
-	d = time.Since(t)
+			r := &io.LimitedReader{
+				R: file,
+				N: size,
+			}
+
+			io.Copy(new(ZeroReadWriter), r)
+			file.Close()
+			times++
+		}
+	}()
+
+	time.Sleep(sleepTime)
 	return
 }
 
-type NWriter struct{}
+type ZeroReadWriter struct{}
 
-func (w *NWriter) Write(p []byte) (n int, err error) {
+func (z *ZeroReadWriter) Read(p []byte) (n int, err error) {
+	return len(p), nil
+}
+
+func (z *ZeroReadWriter) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
