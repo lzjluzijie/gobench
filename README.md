@@ -4,6 +4,6 @@ To-Do
  - [ ] Multiple node speedtest
  - [x] System info
  - [ ] Better CPU benchmark
- - [ ] Memory benchmark
+ - [x] Memory benchmark
  - [ ] Trace route
  - [ ] Online benchmark report
