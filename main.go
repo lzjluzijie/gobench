@@ -42,7 +42,7 @@ func main() {
 		logger.Errorf(err.Error())
 	}
 	logger.Infof("Write 1MB speed %.2fMB/s", 1/d.Seconds())
-	d, err = bench.Read()
+	d, err = bench.Read(1 * MB)
 	if err != nil {
 		logger.Errorf(err.Error())
 	}
@@ -53,7 +53,7 @@ func main() {
 		logger.Errorf(err.Error())
 	}
 	logger.Infof("Write 16MB speed %.2fMB/s", 16/d.Seconds())
-	d, err = bench.Read()
+	d, err = bench.Read(16 * MB)
 	if err != nil {
 		logger.Errorf(err.Error())
 	}
@@ -63,7 +63,7 @@ func main() {
 		logger.Errorf(err.Error())
 	}
 	logger.Infof("Write 256MB speed %.2fMB/s", 256/d.Seconds())
-	d, err = bench.Read()
+	d, err = bench.Read(256 * MB)
 	if err != nil {
 		logger.Errorf(err.Error())
 	}
