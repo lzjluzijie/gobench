@@ -1,15 +1,23 @@
 package bench
 
 import (
+	"fmt"
 	"io"
+	"io/ioutil"
+	"math/rand"
 	"os"
 	"time"
 )
 
 func Write(size int64) (times int) {
+	os.Mkdir("temp", 600)
+	tc := make(chan int)
 	go func() {
+		ts := 0
+		t := time.Now()
 		for {
-			file, err := os.Create("gobench.tmp")
+			name := fmt.Sprintf("temp/gobench-%d", ts)
+			file, err := os.Create(name)
 			if err != nil {
 				panic(err)
 			}
@@ -23,19 +31,41 @@ func Write(size int64) (times int) {
 			if err != nil {
 				panic(err)
 			}
-			file.Close()
-			times++
+
+			err = file.Close()
+			if err != nil {
+				panic(err)
+			}
+
+			ts++
+
+			if time.Since(t) >= sleepTime {
+				tc <- ts
+				return
+			}
 		}
 	}()
 
-	time.Sleep(sleepTime)
+	times = <-tc
 	return
 }
 
 func Read(size int64) (times int) {
+	tc := make(chan int)
+	fs, err := ioutil.ReadDir("temp")
+	if err != nil {
+		panic(err)
+	}
+
+	s := len(fs)
+
 	go func() {
+		ts := 0
+		t := time.Now()
 		for {
-			file, err := os.Open("gobench.tmp")
+			rd := rand.Intn(s)
+			name := fmt.Sprintf("temp/gobench-%d", rd)
+			file, err := os.Open(name)
 			if err != nil {
 				panic(err)
 			}
@@ -45,13 +75,35 @@ func Read(size int64) (times int) {
 				N: size,
 			}
 
-			io.Copy(new(ZeroReadWriter), r)
-			file.Close()
-			times++
+			_, err = io.Copy(new(ZeroReadWriter), r)
+			if err != nil {
+				panic(err)
+			}
+
+			err = file.Close()
+			if err != nil {
+				panic(err)
+			}
+
+			ts++
+			if time.Since(t) >= sleepTime {
+				tc <- ts
+				return
+			}
 		}
 	}()
 
-	time.Sleep(sleepTime)
+	times = <-tc
+	for _, f := range fs {
+		err = os.Remove(fmt.Sprintf("temp/%s", f.Name()))
+		if err != nil {
+			panic(err)
+		}
+	}
+	err = os.Remove("temp")
+	if err != nil {
+		panic(err)
+	}
 	return
 }
 

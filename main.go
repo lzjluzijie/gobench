@@ -5,7 +5,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"time"
 
 	"encoding/json"
@@ -18,7 +17,7 @@ import (
 
 var MB = int64(1024 * 1024)
 var hashSize = 1 * MB
-var downloadSize = 100 * MB
+var downloadSize = 50 * MB
 
 var logger = loggo.GetLogger("main")
 
@@ -33,12 +32,12 @@ func main() {
 	logger.Infof(string(j))
 
 	//memory test
-	d, err := bench.Rand(1024, 1000)
+	d := bench.Rand(1024, 1000)
 	if err != nil {
 		logger.Errorf(err.Error())
 	}
 	logger.Infof("Read rand 1KB: %.2fµs", float64(d)/1000/1000)
-	d, err = bench.Rand(1024*1024, 100)
+	d = bench.Rand(1024*1024, 100)
 	if err != nil {
 		logger.Errorf(err.Error())
 	}
@@ -46,22 +45,17 @@ func main() {
 
 	//disk test
 	times := bench.Write(1024)
-	logger.Infof("Write 1KB: %dKB/s", times/10)
+	logger.Infof("Write 1KB: %dfiles in 10s", times)
 	times = bench.Read(1024)
-	logger.Infof("Read 1KB: %dKB/s", times/10)
+	logger.Infof("Read 1KB: %dfiles in 10s", times)
 	times = bench.Write(1 * MB)
-	logger.Infof("Write 1MB: %dMB/s", times/10)
+	logger.Infof("Write 1MB: %dfiles in 10s", times)
 	times = bench.Read(1 * MB)
-	logger.Infof("Read 1MB: %dMB/s", times/10)
+	logger.Infof("Read 1MB: %dfiles in 10s", times)
 	times = bench.Write(10 * MB)
-	logger.Infof("Write 10MB: %dMB/s", times*10/10)
+	logger.Infof("Write 10MB: %dfiles in 10s", times*10/10)
 	times = bench.Read(10 * MB)
-	logger.Infof("Read 10MB: %dMB/s", times*10/10)
-	time.Sleep(5 * time.Second)
-	err = os.Remove("gobench.tmp")
-	if err != nil {
-		logger.Errorf(err.Error())
-	}
+	logger.Infof("Read 10MB: %dfiles in 10s", times*10/10)
 
 	//CPU test
 	threads := runtime.NumCPU()
@@ -84,5 +78,5 @@ func main() {
 		logger.Errorf(err.Error())
 	}
 
-	logger.Infof("北京联通: time %.2fs, speed %.2fMB/s", time.Since(t).Seconds(), float64(downloadSize/MB)/time.Since(t).Seconds())
+	logger.Infof("北京联通 50MB: time %.2fs, speed %.2fMB/s", time.Since(t).Seconds(), float64(downloadSize/MB)/time.Since(t).Seconds())
 }
