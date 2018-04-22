@@ -57,12 +57,12 @@ func main() {
 
 	//speed test
 	sts := []*bench.SpeedTest{
-		bench.NewSpeedTest("北京联通", "http://www2.unicomtest.com:8080/download?size=104857600", 100*MB),
-		bench.NewSpeedTest("上海联通", "http://211.95.17.50:8080/download?size=104857600", 100*MB),
-		bench.NewSpeedTest("北京电信", "http://st1.bjtelecom.net:8080/download?size=104857600", 100*MB),
-		bench.NewSpeedTest("广州电信", "http://gzspeedtest.com:8080/download?size=104857600", 100*MB),
-		bench.NewSpeedTest("深圳移动", "http://speedtest3.gd.chinamobile.com:8080/download?size=104857600", 100*MB),
-		bench.NewSpeedTest("北京移动", "http://speedtest.bmcc.com.cn:8080/download?size=104857600", 100*MB),
+		bench.NewSpeedTest("北京联通", "http://www2.unicomtest.com:8080/download?size=10485760", 10*MB),
+		bench.NewSpeedTest("上海联通", "http://211.95.17.50:8080/download?size=10485760", 10*MB),
+		bench.NewSpeedTest("北京电信", "http://st1.bjtelecom.net:8080/download?size=10485760", 10*MB),
+		bench.NewSpeedTest("广州电信", "http://gzspeedtest.com:8080/download?size=10485760", 10*MB),
+		bench.NewSpeedTest("深圳移动", "http://speedtest3.gd.chinamobile.com:8080/download?size=10485760", 10*MB),
+		bench.NewSpeedTest("北京移动", "http://speedtest.bmcc.com.cn:8080/download?size=10485760", 10*MB),
 		bench.NewSpeedTest("东京Linode", "http://speedtest.tokyo.linode.com/100MB-tokyo.bin", 100*MB),
 	}
 
@@ -70,6 +70,7 @@ func main() {
 		err = st.Do()
 		if err != nil {
 			logger.Errorf("%s speed test error: %s", st.Name, err.Error())
+			continue
 		}
 
 		logger.Infof(st.Result())

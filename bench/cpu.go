@@ -26,26 +26,30 @@ func Hash(thread int, size int64) (hashes int) {
 
 func s256(size int64) (hashes int) {
 	s := sha256.New()
-	count := 0
-
+	c := make(chan int)
+	hs := 0
 	go func() {
+		t := time.Now()
 		for {
-			r := &io.LimitedReader{
+			_, err := io.Copy(s, &io.LimitedReader{
 				R: rand.New(rand.NewSource(233)),
 				N: size,
-			}
+			})
 
-			_, err := io.Copy(s, r)
 			if err != nil {
 				log.Fatalln(err.Error())
 			}
 
 			s.Sum(nil)
 			s.Reset()
-			count++
+			hs++
+			if time.Since(t) >= sleepTime {
+				c <- hs
+				return
+			}
 		}
 	}()
 
-	time.Sleep(sleepTime)
-	return count
+	hashes = <-c
+	return
 }

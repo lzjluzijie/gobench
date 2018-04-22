@@ -48,5 +48,5 @@ func (st *SpeedTest) Do() (err error) {
 }
 
 func (st *SpeedTest) Result() (result string) {
-	return fmt.Sprintf("%s 50MB: time %.2fs, speed %.2fMB/s", st.Name, st.Duration.Seconds(), st.Speed)
+	return fmt.Sprintf("%s %dMB: time %.2fs, speed %.2fMB/s", st.Name, st.Size/1048576, st.Duration.Seconds(), st.Speed)
 }

@@ -11,7 +11,7 @@ import (
 
 func Write(size int64) (times int) {
 	os.Mkdir("temp", 600)
-	tc := make(chan int)
+	c := make(chan int)
 	go func() {
 		ts := 0
 		t := time.Now()
@@ -39,18 +39,18 @@ func Write(size int64) (times int) {
 			ts++
 
 			if time.Since(t) >= sleepTime {
-				tc <- ts
+				c <- ts
 				return
 			}
 		}
 	}()
 
-	times = <-tc
+	times = <-c
 	return
 }
 
 func Read(size int64) (times int) {
-	tc := make(chan int)
+	c := make(chan int)
 	fs, err := ioutil.ReadDir("temp")
 	if err != nil {
 		panic(err)
@@ -85,13 +85,13 @@ func Read(size int64) (times int) {
 
 			ts++
 			if time.Since(t) >= sleepTime {
-				tc <- ts
+				c <- ts
 				return
 			}
 		}
 	}()
 
-	times = <-tc
+	times = <-c
 	for _, f := range fs {
 		err = os.Remove(fmt.Sprintf("temp/%s", f.Name()))
 		if err != nil {
