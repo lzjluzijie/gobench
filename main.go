@@ -18,6 +18,9 @@ func main() {
 	logger.SetLogLevel(loggo.INFO)
 	//System info
 	info, err := bench.GetInfo()
+	if err != nil {
+		logger.Errorf(err.Error())
+	}
 	j, err := json.Marshal(info)
 	if err != nil {
 		logger.Errorf(err.Error())

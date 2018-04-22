@@ -3,6 +3,8 @@ package bench
 import (
 	"runtime"
 
+	"os/exec"
+
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/mem"
@@ -26,6 +28,7 @@ type SystemInfo struct {
 	PlatformVersion string
 	KernelVersion   string
 	Arch            string
+	Virt            string
 }
 
 type MemoryInfo struct {
@@ -46,17 +49,6 @@ func GetInfo() (info *Info, err error) {
 	info.Model = ci[0].ModelName
 	info.Cores = ci[0].Cores
 
-	//System
-	si, err := host.Info()
-	if err != nil {
-		return
-	}
-	info.Hostname = si.Hostname
-	info.OS = si.OS
-	info.Platform = si.Platform
-	info.PlatformVersion = si.PlatformVersion
-	info.KernelVersion = si.KernelVersion
-
 	//Memory info
 	vmi, err := mem.VirtualMemory()
 	if err != nil {
@@ -72,5 +64,25 @@ func GetInfo() (info *Info, err error) {
 	info.UsedSwap = smi.Used
 
 	info.Arch = runtime.GOARCH
+
+	//System
+	si, err := host.Info()
+	if err != nil {
+		return
+	}
+	info.Hostname = si.Hostname
+	info.OS = si.OS
+	info.Platform = si.Platform
+	info.PlatformVersion = si.PlatformVersion
+	info.KernelVersion = si.KernelVersion
+
+	//Virt
+	virtB, err := exec.Command("virt-what", "").Output()
+	if err != nil {
+		info.Virt = "error"
+		return
+	}
+
+	info.Virt = string(virtB)
 	return
 }
