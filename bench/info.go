@@ -77,12 +77,12 @@ func GetInfo() (info *Info, err error) {
 	info.KernelVersion = si.KernelVersion
 
 	//Virt
-	virtB, err := exec.Command("virt-what", "").Output()
+	virtB, err := exec.Command("virt-what").Output()
 	if err != nil {
 		info.Virt = "error"
 		return
 	}
 
-	info.Virt = string(virtB)
+	info.Virt = string(virtB[:len(virtB)-1])
 	return
 }
