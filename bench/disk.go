@@ -22,12 +22,11 @@ func Write(size int64) (times int) {
 				panic(err)
 			}
 
-			r := &io.LimitedReader{
-				R: new(ZeroReadWriter),
+			_, err = io.Copy(file, &io.LimitedReader{
+				R: &ZeroReadWriter{},
 				N: size,
-			}
+			})
 
-			_, err = io.Copy(file, r)
 			if err != nil {
 				panic(err)
 			}
@@ -70,12 +69,11 @@ func Read(size int64) (times int) {
 				panic(err)
 			}
 
-			r := &io.LimitedReader{
+			_, err = io.Copy(&ZeroReadWriter{}, &io.LimitedReader{
 				R: file,
 				N: size,
-			}
+			})
 
-			_, err = io.Copy(new(ZeroReadWriter), r)
 			if err != nil {
 				panic(err)
 			}
