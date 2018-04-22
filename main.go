@@ -27,6 +27,11 @@ func main() {
 	}
 	logger.Infof(string(j))
 
+	//CPU test
+	threads := runtime.NumCPU()
+	hashes := bench.Hash(threads, hashSize)
+	logger.Infof("CPU benchmark: %d hashes with %d threads in 10s", hashes, threads)
+
 	//memory test
 	d := bench.Rand(1024, 1000)
 	if err != nil {
@@ -52,11 +57,6 @@ func main() {
 	logger.Infof("Write 10MB: %dfiles in 10s", times*10/10)
 	times = bench.Read(10 * MB)
 	logger.Infof("Read 10MB: %dfiles in 10s", times*10/10)
-
-	//CPU test
-	threads := runtime.NumCPU()
-	hashes := bench.Hash(threads, hashSize)
-	logger.Infof("CPU benchmark: %d hashes with %d threads in 10s", hashes, threads)
 
 	//speed test
 	sts := []*bench.SpeedTest{
