@@ -1,9 +1,11 @@
 # GoBench
 
 To-Do
- - [ ] Multiple node speedtest
+ - [x] Multiple node speedtest
  - [x] System info
- - [ ] Better CPU benchmark
  - [x] Memory benchmark
+ - [ ] Random read disk
+ - [ ] CLI
+ - [ ] Better CPU benchmark
  - [ ] Trace route
  - [ ] Online benchmark report

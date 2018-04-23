@@ -47,16 +47,16 @@ func main() {
 	//disk test
 	times := bench.Write(1024)
 	logger.Infof("Write 1KB: %dfiles in 10s", times)
-	times = bench.Read(1024)
-	logger.Infof("Read 1KB: %dfiles in 10s", times)
+	//times = bench.Read(1024)
+	//logger.Infof("Read 1KB: %dfiles in 10s", times)
 	times = bench.Write(1 * MB)
 	logger.Infof("Write 1MB: %dfiles in 10s", times)
-	times = bench.Read(1 * MB)
-	logger.Infof("Read 1MB: %dfiles in 10s", times)
+	//times = bench.Read(1 * MB)
+	//logger.Infof("Read 1MB: %dfiles in 10s", times)
 	times = bench.Write(10 * MB)
 	logger.Infof("Write 10MB: %dfiles in 10s", times*10/10)
-	times = bench.Read(10 * MB)
-	logger.Infof("Read 10MB: %dfiles in 10s", times*10/10)
+	//times = bench.Read(10 * MB)
+	//logger.Infof("Read 10MB: %dfiles in 10s", times*10/10)
 
 	//speed test
 	sts := []*bench.SpeedTest{
