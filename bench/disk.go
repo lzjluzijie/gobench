@@ -8,7 +8,6 @@ import (
 )
 
 func Write(size int64) (times int) {
-	os.Mkdir("temp", 600)
 	c := make(chan int)
 	for i := 0; i < 4; i++ {
 		id := i
