@@ -44,7 +44,7 @@ func (b *SHA3Bench) Do() (err error) {
 			t := time.Now()
 			for {
 				_, err := io.Copy(hash, &io.LimitedReader{
-					R: rand.New(rand.NewSource(233)),
+					R: rand.New(rand.NewSource(time.Now().Unix())),
 					N: size,
 				})
 
