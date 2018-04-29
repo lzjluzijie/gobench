@@ -7,7 +7,29 @@ import (
 	"time"
 )
 
-func Write(size int64) (times int) {
+type DiskBench struct {
+	Name     string
+	Size     int64
+	Times    int
+	Duration time.Duration
+	Speed    float64
+
+	finished bool
+}
+
+func NewDiskBench(size int64, duration time.Duration) (b *DiskBench) {
+	return &DiskBench{
+		Name:     fmt.Sprintf("Disk: write %dKB", size/1024),
+		Size:     size,
+		Duration: duration,
+	}
+	return
+}
+
+func (b *DiskBench) Do() (err error) {
+	size := b.Size
+	duration := b.Duration
+	times := 0
 	c := make(chan int)
 	for i := 0; i < 4; i++ {
 		id := i
@@ -40,7 +62,7 @@ func Write(size int64) (times int) {
 
 					ts++
 
-					if time.Since(t) >= sleepTime {
+					if time.Since(t) >= duration {
 						c <- ts
 						return
 					}
@@ -53,54 +75,21 @@ func Write(size int64) (times int) {
 		times = times + <-c
 	}
 
+	b.Times = times
+	b.Speed = float64(int64(times)*size/1048576) / b.Duration.Seconds()
+	b.finished = true
 	return
 }
 
-//func Read(size int64) (times int) {
-//	c := make(chan int)
-//	fs, err := ioutil.ReadDir("temp")
-//	if err != nil {
-//		panic(err)
-//	}
-//
-//	s := len(fs)
-//
-//	go func() {
-//		ts := 0
-//		t := time.Now()
-//		for {
-//			rd := rand.Intn(s)
-//			name := fmt.Sprintf("temp/gobench-%d", rd)
-//			file, err := os.Open(name)
-//			if err != nil {
-//				panic(err)
-//			}
-//
-//			_, err = io.Copy(&ZeroReadWriter{}, &io.LimitedReader{
-//				R: file,
-//				N: size,
-//			})
-//
-//			if err != nil {
-//				panic(err)
-//			}
-//
-//			err = file.Close()
-//			if err != nil {
-//				panic(err)
-//			}
-//
-//			ts++
-//			if time.Since(t) >= sleepTime {
-//				c <- ts
-//				return
-//			}
-//		}
-//	}()
-//
-//	times = <-c
-//	return
-//}
+func (b *DiskBench) Result() (result string) {
+	if !b.finished {
+		err := b.Do()
+		if err != nil {
+			return err.Error()
+		}
+	}
+	return fmt.Sprintf("%s: %.2fMB/s", b.Name, b.Speed)
+}
 
 type ZeroReadWriter struct{}
 

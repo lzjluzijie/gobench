@@ -7,30 +7,33 @@ import (
 
 	"log"
 
+	"time"
+
 	"github.com/lzjluzijie/gobench/bench"
 	"github.com/urfave/cli"
 )
 
-var MB = int64(1024 * 1024)
-var hashSize = 1 * MB
-
 var sts = []*bench.SpeedTest{
-	bench.NewSpeedTest("北京联通", "http://www2.unicomtest.com:8080/download?size=10485760", 10*MB),
-	bench.NewSpeedTest("上海联通", "http://211.95.17.50:8080/download?size=10485760", 10*MB),
-	bench.NewSpeedTest("北京电信", "http://st1.bjtelecom.net:8080/download?size=10485760", 10*MB),
-	bench.NewSpeedTest("广州电信", "http://gzspeedtest.com:8080/download?size=10485760", 10*MB),
-	bench.NewSpeedTest("深圳移动", "http://speedtest3.gd.chinamobile.com:8080/download?size=10485760", 10*MB),
-	bench.NewSpeedTest("北京移动", "http://speedtest.bmcc.com.cn:8080/download?size=10485760", 10*MB),
-	bench.NewSpeedTest("东京Linode", "http://speedtest.tokyo.linode.com/100MB-tokyo.bin", 100*MB),
+	bench.NewSpeedTest("北京联通", "http://www2.unicomtest.com:8080/download?size=10485760", 10485760),
+	bench.NewSpeedTest("上海联通", "http://211.95.17.50:8080/download?size=10485760", 10485760),
+	bench.NewSpeedTest("北京电信", "http://st1.bjtelecom.net:8080/download?size=10485760", 10485760),
+	bench.NewSpeedTest("广州电信", "http://gzspeedtest.com:8080/download?size=10485760", 10485760),
+	bench.NewSpeedTest("深圳移动", "http://speedtest3.gd.chinamobile.com:8080/download?size=10485760", 10485760),
+	bench.NewSpeedTest("北京移动", "http://speedtest.bmcc.com.cn:8080/download?size=10485760", 10485760),
+	bench.NewSpeedTest("CacheFly", "http://cachefly.cachefly.net/100mb.test", 104857600),
+	bench.NewSpeedTest("东京Linode", "http://speedtest.tokyo.linode.com/100MB-tokyo.bin", 104857600),
+	bench.NewSpeedTest("洛杉矶Psychz", "http://lg.lax.psychz.net/200MB.test", 209715200),
 }
 
 var app = cli.NewApp()
 
 func init() {
 	app.Name = "GoBench"
-	app.Author = "Halulu"
-	app.Version = "0.1.0"
+	app.Version = "0.2.0"
 	app.Usage = "A simple benchmark tool"
+	app.Description = "See https://github.com/lzjluzijie/gobench"
+	app.Author = "Halulu"
+	app.Email = "lzjluzijie@gmail.com"
 	app.Action = func(c *cli.Context) (err error) {
 		if err = info(c); err != nil {
 			return
@@ -95,46 +98,32 @@ func info(c *cli.Context) (err error) {
 func cpu(c *cli.Context) (err error) {
 	//CPU test
 	threads := runtime.NumCPU()
-	hashes := bench.Hash(threads, hashSize)
-	log.Printf("CPU benchmark: %d hashes with %d threads in 10s", hashes, threads)
+	b := bench.NewSHA3Bench(threads, 1*1048576, 10*time.Second)
+	log.Printf(b.Result())
 	return
 }
 
 func memory(c *cli.Context) (err error) {
 	//memory test
-	d := bench.Rand(1024, 1000)
-	log.Printf("Read rand 1KB: %.2fµs", float64(d)/1000/1000)
-	d = bench.Rand(1024*1024, 100)
-	log.Printf("Read rand 1MB: %.2fµs", float64(d)/1000/100)
+	b := bench.NewMemoryBench(1024, 10000)
+	log.Printf(b.Result())
+	b = bench.NewMemoryBench(1024*1024, 500)
+	log.Printf(b.Result())
 	return
 }
 
 func disk(c *cli.Context) (err error) {
 	//disk test
-	times := bench.Write(1024)
-	log.Printf("Write 1KB: %dfiles in 10s", times)
-	//times = bench.Read(1024)
-	//logger.Infof("Read 1KB: %dfiles in 10s", times)
-	times = bench.Write(1 * MB)
-	log.Printf("Write 1MB: %dfiles in 10s", times)
-	//times = bench.Read(1 * MB)
-	//logger.Infof("Read 1MB: %dfiles in 10s", times)
-	times = bench.Write(10 * MB)
-	log.Printf("Write 10MB: %dfiles in 10s", times*10/10)
-	//times = bench.Read(10 * MB)
-	//logger.Infof("Read 10MB: %dfiles in 10s", times*10/10)
+	b := bench.NewDiskBench(1024, 10*time.Second)
+	log.Println(b.Result())
+	b = bench.NewDiskBench(1024*1024, 10*time.Second)
+	log.Println(b.Result())
 	return
 }
 
 func speed(c *cli.Context) (err error) {
 	//speed test
 	for _, st := range sts {
-		err := st.Do()
-		if err != nil {
-			log.Printf("%s speed test error: %s", st.Name, err.Error())
-			continue
-		}
-
 		log.Printf(st.Result())
 	}
 	return
