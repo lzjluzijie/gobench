@@ -85,7 +85,7 @@ func (b *DiskBench) Result() (result string) {
 	if !b.finished {
 		err := b.Do()
 		if err != nil {
-			return err.Error()
+			return fmt.Sprintf("%s err: %s", b.Name, err.Error())
 		}
 	}
 	return fmt.Sprintf("%s: %.2fMB/s", b.Name, b.Speed)

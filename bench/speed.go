@@ -51,7 +51,7 @@ func (st *SpeedTest) Result() (result string) {
 	if !st.finished {
 		err := st.Do()
 		if err != nil {
-			return err.Error()
+			return fmt.Sprintf("%s err: %s", st.Name, err.Error())
 		}
 	}
 	return fmt.Sprintf("%s: time %.2fs, speed %.2fMB/s", st.Name, st.Duration.Seconds(), st.Speed)
