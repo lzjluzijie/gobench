@@ -5,7 +5,7 @@ To-Do
  - [x] System info
  - [x] Memory benchmark
  - [ ] Random read disk
- - [ ] CLI
+ - [x] CLI
  - [ ] Better CPU benchmark
  - [ ] Trace route
  - [ ] Online benchmark report

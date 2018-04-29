@@ -19,7 +19,7 @@ type SpeedTest struct {
 
 func NewSpeedTest(name, url string, size int64) (st *SpeedTest) {
 	return &SpeedTest{
-		Name: name,
+		Name: fmt.Sprintf("SpeedTest: %s %dMB", name, size/1048576),
 		URL:  url,
 		Size: size,
 	}
@@ -48,5 +48,11 @@ func (st *SpeedTest) Do() (err error) {
 }
 
 func (st *SpeedTest) Result() (result string) {
-	return fmt.Sprintf("%s %dMB: time %.2fs, speed %.2fMB/s", st.Name, st.Size/1048576, st.Duration.Seconds(), st.Speed)
+	if !st.finished {
+		err := st.Do()
+		if err != nil {
+			return ""
+		}
+	}
+	return fmt.Sprintf("%s: time %.2fs, speed %.2fMB/s", st.Name, st.Duration.Seconds(), st.Speed)
 }
