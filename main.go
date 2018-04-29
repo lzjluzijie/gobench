@@ -13,17 +13,16 @@ import (
 	"github.com/urfave/cli"
 )
 
-var MB = int64(1024 * 1024)
-var hashSize = 1 * MB
-
 var sts = []*bench.SpeedTest{
-	bench.NewSpeedTest("北京联通", "http://www2.unicomtest.com:8080/download?size=10485760", 10*MB),
-	bench.NewSpeedTest("上海联通", "http://211.95.17.50:8080/download?size=10485760", 10*MB),
-	bench.NewSpeedTest("北京电信", "http://st1.bjtelecom.net:8080/download?size=10485760", 10*MB),
-	bench.NewSpeedTest("广州电信", "http://gzspeedtest.com:8080/download?size=10485760", 10*MB),
-	bench.NewSpeedTest("深圳移动", "http://speedtest3.gd.chinamobile.com:8080/download?size=10485760", 10*MB),
-	bench.NewSpeedTest("北京移动", "http://speedtest.bmcc.com.cn:8080/download?size=10485760", 10*MB),
-	bench.NewSpeedTest("东京Linode", "http://speedtest.tokyo.linode.com/100MB-tokyo.bin", 100*MB),
+	bench.NewSpeedTest("北京联通", "http://www2.unicomtest.com:8080/download?size=10485760", 10485760),
+	bench.NewSpeedTest("上海联通", "http://211.95.17.50:8080/download?size=10485760", 10485760),
+	bench.NewSpeedTest("北京电信", "http://st1.bjtelecom.net:8080/download?size=10485760", 10485760),
+	bench.NewSpeedTest("广州电信", "http://gzspeedtest.com:8080/download?size=10485760", 10485760),
+	bench.NewSpeedTest("深圳移动", "http://speedtest3.gd.chinamobile.com:8080/download?size=10485760", 10485760),
+	bench.NewSpeedTest("北京移动", "http://speedtest.bmcc.com.cn:8080/download?size=10485760", 10485760),
+	bench.NewSpeedTest("CacheFly", "http://cachefly.cachefly.net/100mb.test", 104857600),
+	bench.NewSpeedTest("东京Linode", "http://speedtest.tokyo.linode.com/100MB-tokyo.bin", 104857600),
+	bench.NewSpeedTest("洛杉矶Psychz", "http://lg.lax.psychz.net/200MB.test", 209715200),
 }
 
 var app = cli.NewApp()
