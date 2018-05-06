@@ -29,7 +29,7 @@ var app = cli.NewApp()
 
 func init() {
 	app.Name = "GoBench"
-	app.Version = "0.2.0"
+	app.Version = "0.3.0"
 	app.Usage = "A simple benchmark tool"
 	app.Description = "See https://github.com/lzjluzijie/gobench"
 	app.Author = "Halulu"
@@ -47,7 +47,7 @@ func init() {
 		if err = disk(c); err != nil {
 			return
 		}
-		if err = speed(c); err != nil {
+		if err = speedtest(c); err != nil {
 			return
 		}
 		return
@@ -74,9 +74,14 @@ func init() {
 			Action: disk,
 		},
 		{
-			Name:   "speed",
-			Usage:  "Run speed test",
-			Action: speed,
+			Name:   "speedtest",
+			Usage:  "Run speedtest",
+			Action: speedtest,
+		},
+		{
+			Name:   "traceroute",
+			Usage:  "Run traceroute",
+			Action: traceroute,
 		},
 	}
 }
@@ -121,11 +126,17 @@ func disk(c *cli.Context) (err error) {
 	return
 }
 
-func speed(c *cli.Context) (err error) {
-	//speed test
+func speedtest(c *cli.Context) (err error) {
+	//speedtest
 	for _, st := range sts {
 		log.Printf(st.Result())
 	}
+	return
+}
+
+func traceroute(c *cli.Context) (err error) {
+	tr := bench.NewTraceRoute("北京联通", "www2.unicomtest.com")
+	err = tr.Do()
 	return
 }
 
