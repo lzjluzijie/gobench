@@ -13,16 +13,26 @@ import (
 	"github.com/urfave/cli"
 )
 
-var sts = []*bench.SpeedTest{
+var SpeedTests = []*bench.SpeedTest{
 	bench.NewSpeedTest("北京联通", "http://www2.unicomtest.com:8080/download?size=10485760", 10485760),
 	bench.NewSpeedTest("上海联通", "http://211.95.17.50:8080/download?size=10485760", 10485760),
 	bench.NewSpeedTest("北京电信", "http://st1.bjtelecom.net:8080/download?size=10485760", 10485760),
 	bench.NewSpeedTest("广州电信", "http://gzspeedtest.com:8080/download?size=10485760", 10485760),
 	bench.NewSpeedTest("深圳移动", "http://speedtest3.gd.chinamobile.com:8080/download?size=10485760", 10485760),
 	bench.NewSpeedTest("北京移动", "http://speedtest.bmcc.com.cn:8080/download?size=10485760", 10485760),
-	bench.NewSpeedTest("CacheFly", "http://cachefly.cachefly.net/100mb.test", 104857600),
 	bench.NewSpeedTest("东京Linode", "http://speedtest.tokyo.linode.com/100MB-tokyo.bin", 104857600),
 	bench.NewSpeedTest("洛杉矶Psychz", "http://lg.lax.psychz.net/200MB.test", 209715200),
+	bench.NewSpeedTest("CacheFly", "http://cachefly.cachefly.net/100mb.test", 104857600),
+}
+
+var TraceRoutes = []*bench.TraceRoute{
+	bench.NewTraceRoute("北京联通", "www2.unicomtest.com"),
+	bench.NewTraceRoute("上海联通", "211.95.17.50"),
+	bench.NewTraceRoute("北京电信", "st1.bjtelecom.net"),
+	bench.NewTraceRoute("广州电信", "gzspeedtest.com"),
+	bench.NewTraceRoute("北京移动", "speedtest.bmcc.com.cn"),
+	bench.NewTraceRoute("东京Linode", "speedtest.tokyo.linode.com"),
+	bench.NewTraceRoute("洛杉矶Psychz", "http://lg.lax.psychz.net/200MB.test"),
 }
 
 var app = cli.NewApp()
@@ -87,7 +97,6 @@ func init() {
 }
 
 func info(c *cli.Context) (err error) {
-	//System info
 	info, err := bench.GetInfo()
 	if err != nil {
 		log.Println(err.Error())
@@ -101,7 +110,6 @@ func info(c *cli.Context) (err error) {
 }
 
 func cpu(c *cli.Context) (err error) {
-	//CPU test
 	threads := runtime.NumCPU()
 	b := bench.NewSHA3Bench(threads, 1*1048576, 10*time.Second)
 	log.Printf(b.Result())
@@ -109,7 +117,6 @@ func cpu(c *cli.Context) (err error) {
 }
 
 func memory(c *cli.Context) (err error) {
-	//memory test
 	b := bench.NewMemoryBench(1024, 10000)
 	log.Printf(b.Result())
 	b = bench.NewMemoryBench(1024*1024, 500)
@@ -118,7 +125,6 @@ func memory(c *cli.Context) (err error) {
 }
 
 func disk(c *cli.Context) (err error) {
-	//disk test
 	b := bench.NewDiskBench(1024, 10*time.Second)
 	log.Println(b.Result())
 	b = bench.NewDiskBench(1024*1024, 10*time.Second)
@@ -127,16 +133,21 @@ func disk(c *cli.Context) (err error) {
 }
 
 func speedtest(c *cli.Context) (err error) {
-	//speedtest
-	for _, st := range sts {
+	for _, st := range SpeedTests {
 		log.Printf(st.Result())
 	}
 	return
 }
 
 func traceroute(c *cli.Context) (err error) {
-	tr := bench.NewTraceRoute("北京联通", "www2.unicomtest.com")
-	err = tr.Do()
+	for _, tr := range TraceRoutes {
+		err = tr.Do()
+		if err != nil {
+			return
+		}
+
+		log.Println(tr.Result)
+	}
 	return
 }
 

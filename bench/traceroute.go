@@ -2,9 +2,7 @@ package bench
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"os/exec"
 	"runtime"
 	"time"
@@ -34,7 +32,7 @@ func (tr *TraceRoute) Do() (err error) {
 		cmd.Stdout = buf
 		err = cmd.Run()
 	} else {
-		cmd := exec.Command("tracepath", fmt.Sprintf("-b %s", tr.Host))
+		cmd := exec.Command("tracepath", "-b", tr.Host)
 		cmd.Stdout = buf
 		err = cmd.Run()
 	}
@@ -43,8 +41,11 @@ func (tr *TraceRoute) Do() (err error) {
 		return
 	}
 
-	r, err := ioutil.ReadAll(buf)
+	result, err := ioutil.ReadAll(buf)
+	if err != nil {
+		return
+	}
 
-	log.Println(string(r))
+	tr.Result = string(result)
 	return
 }
