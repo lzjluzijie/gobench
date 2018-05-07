@@ -11,6 +11,7 @@ import (
 
 	"github.com/lzjluzijie/gobench/bench"
 	"github.com/urfave/cli"
+	"sync"
 )
 
 var SpeedTests = []*bench.SpeedTest{
@@ -32,7 +33,7 @@ var TraceRoutes = []*bench.TraceRoute{
 	bench.NewTraceRoute("广州电信", "gzspeedtest.com"),
 	bench.NewTraceRoute("北京移动", "speedtest.bmcc.com.cn"),
 	bench.NewTraceRoute("东京Linode", "speedtest.tokyo.linode.com"),
-	bench.NewTraceRoute("洛杉矶Psychz", "http://lg.lax.psychz.net/200MB.test"),
+	bench.NewTraceRoute("洛杉矶Psychz", "lg.lax.psychz.net"),
 }
 
 var app = cli.NewApp()
@@ -58,6 +59,9 @@ func init() {
 			return
 		}
 		if err = speedtest(c); err != nil {
+			return
+		}
+		if err = traceroute(c); err != nil {
 			return
 		}
 		return
@@ -140,14 +144,24 @@ func speedtest(c *cli.Context) (err error) {
 }
 
 func traceroute(c *cli.Context) (err error) {
+	wg := sync.WaitGroup{}
 	for _, tr := range TraceRoutes {
-		err = tr.Do()
-		if err != nil {
-			return
-		}
+		wg.Add(1)
+		t := tr
+		go func() {
+			defer wg.Done()
 
-		log.Println(tr.Result)
+			err = t.Do()
+			if err != nil {
+				log.Println(err.Error())
+				return
+			}
+			log.Println(t.Result)
+
+		}()
 	}
+
+	wg.Wait()
 	return
 }
 
