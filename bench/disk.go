@@ -3,6 +3,7 @@ package bench
 import (
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"time"
 )
@@ -19,7 +20,7 @@ type DiskBench struct {
 
 func NewDiskBench(size int64, duration time.Duration) (b *DiskBench) {
 	return &DiskBench{
-		Name:     fmt.Sprintf("Disk: write %dKB", size/1024),
+		Name:     fmt.Sprintf("Disk: random write %dKB", size/1024),
 		Size:     size,
 		Duration: duration,
 	}
@@ -45,7 +46,7 @@ func (b *DiskBench) Do() (err error) {
 					}
 
 					_, err = io.Copy(file, &io.LimitedReader{
-						R: &ZeroReadWriter{},
+						R: rand.New(rand.NewSource(time.Now().Unix())),
 						N: size,
 					})
 
@@ -85,7 +86,7 @@ func (b *DiskBench) Result() (result string) {
 	if !b.finished {
 		err := b.Do()
 		if err != nil {
-			return err.Error()
+			return fmt.Sprintf("%s err: %s", b.Name, err.Error())
 		}
 	}
 	return fmt.Sprintf("%s: %.2fMB/s", b.Name, b.Speed)

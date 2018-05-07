@@ -44,7 +44,7 @@ func (b *SHA3Bench) Do() (err error) {
 			t := time.Now()
 			for {
 				_, err := io.Copy(hash, &io.LimitedReader{
-					R: rand.New(rand.NewSource(233)),
+					R: rand.New(rand.NewSource(time.Now().Unix())),
 					N: size,
 				})
 
@@ -77,7 +77,7 @@ func (b *SHA3Bench) Result() (result string) {
 	if !b.finished {
 		err := b.Do()
 		if err != nil {
-			return err.Error()
+			return fmt.Sprintf("%s err: %s", b.Name, err.Error())
 		}
 	}
 	return fmt.Sprintf("%s: %d hashes in %d second", b.Name, b.Hashes, int(b.Duration.Seconds()))
