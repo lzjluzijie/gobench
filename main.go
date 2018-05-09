@@ -9,9 +9,10 @@ import (
 
 	"time"
 
+	"sync"
+
 	"github.com/lzjluzijie/gobench/bench"
 	"github.com/urfave/cli"
-	"sync"
 )
 
 var SpeedTests = []*bench.SpeedTest{
@@ -34,70 +35,6 @@ var TraceRoutes = []*bench.TraceRoute{
 	bench.NewTraceRoute("北京移动", "speedtest.bmcc.com.cn"),
 	bench.NewTraceRoute("东京Linode", "speedtest.tokyo.linode.com"),
 	bench.NewTraceRoute("洛杉矶Psychz", "lg.lax.psychz.net"),
-}
-
-var app = cli.NewApp()
-
-func init() {
-	app.Name = "GoBench"
-	app.Version = "0.3.0"
-	app.Usage = "A simple benchmark tool"
-	app.Description = "See https://github.com/lzjluzijie/gobench"
-	app.Author = "Halulu"
-	app.Email = "lzjluzijie@gmail.com"
-	app.Action = func(c *cli.Context) (err error) {
-		if err = info(c); err != nil {
-			return
-		}
-		if err = cpu(c); err != nil {
-			return
-		}
-		if err = memory(c); err != nil {
-			return
-		}
-		if err = disk(c); err != nil {
-			return
-		}
-		if err = speedtest(c); err != nil {
-			return
-		}
-		if err = traceroute(c); err != nil {
-			return
-		}
-		return
-	}
-	app.Commands = []cli.Command{
-		{
-			Name:   "info",
-			Usage:  "Print system info",
-			Action: info,
-		},
-		{
-			Name:   "cpu",
-			Usage:  "Run cpu benchmark",
-			Action: cpu,
-		},
-		{
-			Name:   "memory",
-			Usage:  "Run memory benchmark",
-			Action: memory,
-		},
-		{
-			Name:   "disk",
-			Usage:  "Run disk benchmark",
-			Action: disk,
-		},
-		{
-			Name:   "speedtest",
-			Usage:  "Run speedtest",
-			Action: speedtest,
-		},
-		{
-			Name:   "traceroute",
-			Usage:  "Run traceroute",
-			Action: traceroute,
-		},
-	}
 }
 
 func info(c *cli.Context) (err error) {
@@ -166,6 +103,96 @@ func traceroute(c *cli.Context) (err error) {
 }
 
 func main() {
+	app := cli.NewApp()
+
+	app.Name = "GoBench"
+	app.Version = "0.3.0"
+	app.Usage = "A simple benchmark tool"
+	app.Description = "See https://github.com/lzjluzijie/gobench"
+	app.Author = "Halulu"
+	app.Email = "lzjluzijie@gmail.com"
+	app.Action = func(c *cli.Context) (err error) {
+		info, err := bench.GetInfo()
+		if err != nil {
+			log.Println(err.Error())
+		}
+		j, err := json.Marshal(info)
+		if err != nil {
+			return
+		}
+		log.Println(string(j))
+
+		threads := runtime.NumCPU()
+		cb := bench.NewSHA3Bench(threads, 1*1048576, 10*time.Second)
+		log.Printf(cb.Result())
+
+		mb := bench.NewMemoryBench(1024, 10000)
+		log.Printf(mb.Result())
+		mb = bench.NewMemoryBench(1024*1024, 500)
+		log.Printf(mb.Result())
+
+		db := bench.NewDiskBench(1024, 10*time.Second)
+		log.Println(db.Result())
+		db = bench.NewDiskBench(1024*1024, 10*time.Second)
+		log.Println(db.Result())
+
+		wg := sync.WaitGroup{}
+		for _, tr := range TraceRoutes {
+			wg.Add(1)
+			t := tr
+			go func() {
+				defer wg.Done()
+
+				err = t.Do()
+				if err != nil {
+					log.Println(err.Error())
+					return
+				}
+				log.Println(t.Result)
+
+			}()
+		}
+
+		for _, st := range SpeedTests {
+			log.Printf(st.Result())
+		}
+
+		wg.Wait()
+		return
+	}
+	app.Commands = []cli.Command{
+		{
+			Name:   "info",
+			Usage:  "Print system info",
+			Action: info,
+		},
+		{
+			Name:   "cpu",
+			Usage:  "Run cpu benchmark",
+			Action: cpu,
+		},
+		{
+			Name:   "memory",
+			Usage:  "Run memory benchmark",
+			Action: memory,
+		},
+		{
+			Name:   "disk",
+			Usage:  "Run disk benchmark",
+			Action: disk,
+		},
+		{
+			Name:   "speedtest",
+			Usage:  "Run speedtest",
+			Action: speedtest,
+		},
+		{
+			Name:   "traceroute",
+			Usage:  "Run traceroute",
+			Action: traceroute,
+		},
+	}
+
 	err := app.Run(os.Args)
 	if err != nil {
 		log.Fatalf(err.Error())
